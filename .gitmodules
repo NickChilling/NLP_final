@@ -1,0 +1,3 @@
+[submodule "NER2"]
+	path = NER2
+	url = git@github.com:Montia/ChineseNER.git
