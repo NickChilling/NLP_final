@@ -24,6 +24,7 @@ class BaseModel(object):
             Args:
                 sample_generator: a generator of training samples, set None if third party tool is used.  
         '''
+        pass
 
     
 
