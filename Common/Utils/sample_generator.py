@@ -89,16 +89,18 @@ def pos_sample_generator(batch_size, prefix):
                 count = 0'''
             charactors = []
             tags = []
+            orig = line
             line = line.strip().split()
             for unit in line:
-                if unit == '$$_':
-                    charactors.append(c)
-                    tags.append('O')
+                if unit == '$$_' or unit == '$$__':
+                    charactors.extend(list(unit))
+                    tags.extend('O' * len(unit))
                     continue
                 slash_idx = unit.rfind('/')
                 word = unit[:slash_idx]
                 pos = unit[slash_idx+1:]
                 if slash_idx == -1 or len(pos) > 3 or len(pos) == 0:
+                    #print(orig)
                     print(unit)
                     continue
                 pos_set.add(pos)
