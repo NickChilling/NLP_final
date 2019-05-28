@@ -45,7 +45,6 @@ def process_raw(config):
                             #print(orig)
                             #print(unit)
                             continue
-                        pos_set.add(pos)
                         for i, c in enumerate(word):
                             charactors.append(c)
                             if i == 0:
