@@ -28,10 +28,6 @@ def process_raw(config):
                     orig = line
                     line = line.strip().split()
                     for unit in line:
-                        '''if unit == '$$_' or unit == '$$__':
-                            charactors.extend(list(unit))
-                            tags.extend('O' * len(unit))
-                            continue'''
                         slash_idx = unit.rfind('/')
                         word = unit[:slash_idx]
                         pos = unit[slash_idx+1:]
@@ -56,7 +52,28 @@ def process_raw(config):
                         print(charactor, tag, file=g)
                     print(file=g)
             elif config.task == 'wordseg':
-                raise NotImplementedError()
+                for line in f:
+                    if line.strip() == '':
+                        continue
+                    charactors = []
+                    tags = []
+                    orig = line
+                    line = line.strip().split()
+                    for word in line:
+                        for i, c in enumerate(word):
+                            charactors.append(c)
+                            if i == 0:
+                                tags.append('B-{}'.format(pos.upper()))
+                            else:
+                                tags.append('I-{}'.format(pos.upper()))
+                    if len(charactors) != len(tags):
+                        print(orig)
+                        print(charactors)
+                        print(tags)
+                        raise Exception('len(charactors) != len(tags)')
+                    for charactor, tag in zip(charactors, tags):
+                        print(charactor, tag, file=g)
+                    print(file=g)
             else:
                 raise Exception('Wrong argument: task should be "wordseg" or "pos"')
     print('Done')
