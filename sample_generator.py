@@ -62,8 +62,7 @@ def pos_sample_generator(batch_size, prefix):
             prefix: "train", "dev" or "test"
         
         Yields a list of samples of size "batch_size". 
-        Each sample contains two lists of same length: the former is the charactors of an original sentence, the latter is the corresponding BI tags.
-        Notes: there is no tag "O" in the task of word segmentation.
+        Each sample contains two lists of same length: the former is the charactors of an original sentence, the latter is the corresponding BIO tags.
     '''
 
     if prefix == 'train':
@@ -99,9 +98,11 @@ def pos_sample_generator(batch_size, prefix):
                 slash_idx = unit.rfind('/')
                 word = unit[:slash_idx]
                 pos = unit[slash_idx+1:]
-                if slash_idx == -1 or len(pos) > 3 or len(pos) == 0:
+                if slash_idx == -1 or len(pos) > 3 or len(pos) == 0 or pos[0].isupper():
+                    charactors.extend(list(unit))
+                    tags.extend('O' * len(unit))
                     #print(orig)
-                    print(unit)
+                    #print(unit)
                     continue
                 pos_set.add(pos)
                 for i, c in enumerate(word):
