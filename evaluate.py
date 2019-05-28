@@ -1,5 +1,3 @@
 
-
-
-def test(options):
+def evaluate(options):
     pass

@@ -10,54 +10,60 @@ tag2label = {'time':'TIM', 'location':'LOC', 'person_name':'PER', 'org_name':'OR
 
 
 def process_raw(config):
-    '''transform raw data into standard form and split it into train, dev and test parts'''
-    def _process_entity(s, target):
-        s = s.split(':')
-        tag, s = s[0], ':'.join(s[1:])
-        tag = tag.strip()
-        s = s.strip()
-        label = tag2label[tag]
-        begin = True
-        for i in s:
-            if begin:
-                target.write(i+' B-'+label+'\n')
-                begin = False
-            else:
-                target.write(i+' I-'+label+'\n')
-    
+    '''transform raw data into BIO form'''
+
     print('Start processing raw data...')
-    with open(config.raw_data_path, 'r', encoding='utf-8') as f, \
+    with open(config.raw_train_data_path, 'r', encoding='utf-8') as raw_train, \
+        open(config.raw_dev_data_path, 'r', encoding='utf-8') as raw_dev, \
+        open(config.raw_test1_data_path, 'r', encoding='utf-8') as raw_test, \
         open(config.train_data_path, 'w', encoding='utf-8') as train, \
         open(config.dev_data_path, 'w', encoding='utf-8') as dev, \
-        open(config.test_data_path, 'w', encoding='utf-8') as test:
-
-        for s in f.readlines():
-            s = s.replace(' ', '')
-            s = s.replace('\u3000', '')
-            s = s.replace('\xa0', '')
-            for white in string.whitespace:
-                s = s.replace(white, '')
-
-            a = np.random.randint(1, 10)
-            target = dev if a == 1 else test if a == 2 else train
-
-            i = 0
-            while(i < len(s)):
-                if s[i] == '。':
-                    target.write('{} O\n'.format(s[i]))
-                    target.write('\n')
-                    a = np.random.randint(1, 10)
-                    target = dev if a == 1 else test if a == 2 else train
-                    i += 1
-                elif s[i:i+2] == '{{':
-                    end = s.find('}}', i)
-                    _process_entity(s[i+2:end], target)
-                    i = end + 2
-                else:
-                    target.write('{} O\n'.format(s[i]))
-                    i += 1
-            if s[-1] != '。':
-                target.write('\n')
+        open(config.test1_data_path, 'w', encoding='utf-8') as test:
+        for f, g in ((raw_train, train), (raw_dev, dev), (raw_test, test)):
+            if config.task == 'pos':
+                for line in f:
+                    '''
+                    if count == batch_size:
+                        batches.append(samples)
+                        samples = []
+                        count = 0'''
+                    charactors = []
+                    tags = []
+                    orig = line
+                    line = line.strip().split()
+                    for unit in line:
+                        '''if unit == '$$_' or unit == '$$__':
+                            charactors.extend(list(unit))
+                            tags.extend('O' * len(unit))
+                            continue'''
+                        slash_idx = unit.rfind('/')
+                        word = unit[:slash_idx]
+                        pos = unit[slash_idx+1:]
+                        if slash_idx == -1 or len(pos) > 3 or len(pos) == 0 or pos[0].isupper() or unit == '$$_' or unit == '$$__':
+                            charactors.extend(list(unit))
+                            tags.extend('O' * len(unit))
+                            #print(orig)
+                            #print(unit)
+                            continue
+                        pos_set.add(pos)
+                        for i, c in enumerate(word):
+                            charactors.append(c)
+                            if i == 0:
+                                tags.append('B-{}'.format(pos.upper()))
+                            else:
+                                tags.append('I-{}'.format(pos.upper()))
+                    if len(charactors) != len(tags):
+                        print(orig)
+                        print(charactors)
+                        print(tags)
+                        raise Exception('len(charactors) != len(tags)')
+                    for charactor, tag in zip(charactors, tags):
+                        print(charactor, tag, file=g)
+                    print(file=g)
+            elif config.task == 'wordseg':
+                raise NotImplementedError()
+            else:
+                raise Exception('Wrong argument: task should be "wordseg" or "pos"')
     print('Done')
             
 def make_dataset(path, config, max_length=None):

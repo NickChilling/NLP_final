@@ -3,15 +3,15 @@ import os
 import tensorflow as tf 
 from tqdm import trange 
 
-from data_utils import process_raw
-from data_utils import make_dataset
-from models.bilstm_crf import BilstmCrfModel
+from data import process_raw
+from data import make_dataset
+from model import BilstmCrfModel
 
 
 def train(config):
-    #preprocessing raw data if without training data
-    if True:
-    #if not os.path.exists(config.train_data_path):
+    #preprocessing raw data if not done
+    #if True:
+    if not os.path.exists(config.train_data_path):
         try:
             process_raw(config)
         except Exception as e:
@@ -20,6 +20,8 @@ def train(config):
             os.remove(config.test_data_path)
             raise(e)
     
+    raise Exception('raw data finished')
+
     print('Preparing dataset...')
     #generate train and dev dataset
     dataset_train, l, _ = make_dataset(config.train_data_path, config)
