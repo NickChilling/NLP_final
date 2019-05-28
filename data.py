@@ -4,9 +4,8 @@ import numpy as np
 import pickle
 import string
 import tensorflow as tf 
+import os
 
-
-tag2label = {'time':'TIM', 'location':'LOC', 'person_name':'PER', 'org_name':'ORG', 'company_name':'COM', 'product_name':'PRO'}
 
 
 def process_raw(config):
@@ -22,11 +21,8 @@ def process_raw(config):
         for f, g in ((raw_train, train), (raw_dev, dev), (raw_test, test)):
             if config.task == 'pos':
                 for line in f:
-                    '''
-                    if count == batch_size:
-                        batches.append(samples)
-                        samples = []
-                        count = 0'''
+                    if line.strip() == '':
+                        continue
                     charactors = []
                     tags = []
                     orig = line
@@ -45,7 +41,6 @@ def process_raw(config):
                             #print(orig)
                             #print(unit)
                             continue
-                        pos_set.add(pos)
                         for i, c in enumerate(word):
                             charactors.append(c)
                             if i == 0:
@@ -90,7 +85,9 @@ def make_dataset(path, config, max_length=None):
                 sentence = []
                 labels = []
             else:
-                raise Exception
+                print(X)
+                print(Y)
+                raise Exception()
     
     l = max(len(x) for x in X)
     if max_length == None:
@@ -99,17 +96,17 @@ def make_dataset(path, config, max_length=None):
         max_length = max(max_length, l)
     
 
-    if config.char2id_path is None:
+    if config.char2id_path is None or not os.path.exists(config.char2id_path):
         char2id, id2char = make_char2id(X)
-        pickle.dump(char2id, open(r'.\data\char2id.pkl', 'wb'))
-        pickle.dump(id2char, open(r'.\data\id2char.pkl', 'wb'))
+        pickle.dump(char2id, open(config.char2id_path, 'wb'))
+        pickle.dump(id2char, open(config.id2char_path, 'wb'))
     else:
         char2id = pickle.load(open(config.char2id_path, 'rb'))
-    
-    if config.tag2id_path is None:
-        tag2id, id2tag = make_tag2id()
-        pickle.dump(tag2id, open(r'.\data\tag2id.pkl', 'wb'))
-        pickle.dump(id2tag, open(r'.\data\id2tag.pkl', 'wb'))
+
+    if config.tag2id_path is None or not os.path.exists(config.tag2id_path):
+        tag2id, id2tag = make_tag2id(Y)
+        pickle.dump(tag2id, open(config.tag2id_path, 'wb'))
+        pickle.dump(id2tag, open(config.id2tag_path, 'wb'))
     else:
         tag2id = pickle.load(open(config.tag2id_path, 'rb'))
 
@@ -141,23 +138,26 @@ def make_char2id(X):
     id2char = []
     i = 0
     for c in counter:
-        if counter[c] > 5:
+        if counter[c] > 3:
             char2id[c] = i
             id2char.append(c)
             i += 1
     return char2id, id2char
 
-def make_tag2id():
-    '''return a defaultdict tag2id and a list id2tag'''
-    tag2id = {'O':0}
-    id2tag = ['O']
-    i = 1
-    for t in tag2label:
-        tag2id['B-'+tag2label[t]] = i
-        tag2id['I-'+tag2label[t]] = i + 1
-        id2tag.append('B-'+tag2label[t])
-        id2tag.append('I-'+tag2label[t])
-        i += 2
+def make_tag2id(Y):
+    '''Y is a 2d list
+       return a defaultdict tag2id and a list id2tag'''
+    counter = defaultdict(int)
+    for s in Y:
+        for c in s:
+            counter[c] += 1
+    tag2id = {}
+    id2tag = []
+    i = 0
+    for c in counter:
+        tag2id[c] = i
+        id2tag.append(c)
+        i += 1
     return tag2id, id2tag
 
 def transform_w2id(X, w2id, X_is_2d=True):

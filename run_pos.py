@@ -1,4 +1,5 @@
 import tensorflow as tf 
+import os
 
 from train import train
 from evaluate import evaluate
@@ -7,12 +8,12 @@ flags = tf.app.flags
 
 flags.DEFINE_integer('embedding_dim', 200, 'dimension of the character embedding')
 flags.DEFINE_integer('lstm_units', 200, 'num_units of the BiLSTM layer')
-flags.DEFINE_integer('n_tags', 13, 'num of tags')
+flags.DEFINE_integer('n_tags', 66, 'num of tags')
 flags.DEFINE_integer('batch_size', 50, 'batch size for training')
 flags.DEFINE_integer('early_stopping', 10, 'non increasing epochs for early stopping')
 flags.DEFINE_integer('total_step', 100000, 'total step of training')
 flags.DEFINE_integer('check_freq', 500, 'total step of training')
-flags.DEFINE_integer('voc', 2428, 'volume of the vocabulary')
+flags.DEFINE_integer('voc', 2095, 'volume of the vocabulary')
 flags.DEFINE_float('lr', 0.001, 'learning rate')
 flags.DEFINE_float('dr', 0.5, 'dropout rate')
 flags.DEFINE_string('task', 'pos', 'task: "wordseg" or "pos"')
@@ -34,9 +35,14 @@ flags.DEFINE_string('tensorboard_path', r'./tensorboard/pos', 'path for tensorbo
 config = flags.FLAGS
 
 def main(_):
+    if not os.path.exists('data/pos'):
+        os.mkdir('data/pos')
     if config.mode == 'train':
         train(config)
     elif config.mode == 'evaluate':
+        evaluate(config)
+    elif config.mode == 'all':
+        train(config)
         evaluate(config)
     else:
         raise ValueError('Invalid mode {}'.format(config.mode))

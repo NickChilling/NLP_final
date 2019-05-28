@@ -1,4 +1,11 @@
+ckpt*
+__pycache__*
+tensorboard*
+venv*
+
 *.bak
 *.pyc
+*.pkl
+*.ckpt
 checkpoint*
 events.out.tfevents.*

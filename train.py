@@ -15,13 +15,12 @@ def train(config):
         try:
             process_raw(config)
         except Exception as e:
+            print(e)
             os.remove(config.train_data_path)
             os.remove(config.dev_data_path)
             os.remove(config.test_data_path)
-            raise(e)
+            exit()
     
-    raise Exception('raw data finished')
-
     print('Preparing dataset...')
     #generate train and dev dataset
     dataset_train, l, _ = make_dataset(config.train_data_path, config)
