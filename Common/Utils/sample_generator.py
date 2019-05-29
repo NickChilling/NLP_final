@@ -11,13 +11,13 @@ def wordseg_sample_generator(batch_size, prefix):
         Each sample contains two lists of same length: the former is the charactors of an original sentence, the latter is the corresponding BI tags.
         Notes: there is no tag "O" in the task of word segmentation.
     '''
-
+    path = os.path.dirname(os.path.dirname(__file__))
     if prefix == 'train':
-        path = '../Data/trainset/train_cws.txt'
+        path += '/Data/trainset/train_cws.txt'
     elif prefix == 'dev':
-        path = '../Data/devset/val_cws.txt'
+        path += '/Data/devset/val_cws.txt'
     elif prefix == 'test':
-        path = '../Data/testset1/test_cws.txt'
+        path += '/Data/testset1/test_cws.txt'
     else:
         raise FileNotFoundError('Prefix should be "train", "dev" or "test"')
     

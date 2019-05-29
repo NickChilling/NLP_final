@@ -1,2 +1,6 @@
 *.bak
 *.pyc
+.vscode/settings.json
+.vscode/launch.json
+.idea/
+final_work_space.code-workspace
