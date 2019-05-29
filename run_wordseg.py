@@ -8,7 +8,7 @@ flags = tf.app.flags
 
 flags.DEFINE_integer('embedding_dim', 200, 'dimension of the character embedding')
 flags.DEFINE_integer('lstm_units', 200, 'num_units of the BiLSTM layer')
-flags.DEFINE_integer('n_tags', 66, 'num of tags')
+flags.DEFINE_integer('n_tags', 2, 'num of tags')
 flags.DEFINE_integer('batch_size', 50, 'batch size for training')
 flags.DEFINE_integer('early_stopping', 10, 'non increasing epochs for early stopping')
 flags.DEFINE_integer('total_step', 100000, 'total step of training')

@@ -63,9 +63,9 @@ def process_raw(config):
                         for i, c in enumerate(word):
                             charactors.append(c)
                             if i == 0:
-                                tags.append('B-{}'.format(pos.upper()))
+                                tags.append('B')
                             else:
-                                tags.append('I-{}'.format(pos.upper()))
+                                tags.append('I')
                     if len(charactors) != len(tags):
                         print(orig)
                         print(charactors)
@@ -128,8 +128,12 @@ def make_dataset(path, config, max_length=None):
         tag2id = pickle.load(open(config.tag2id_path, 'rb'))
 
     pad_sequences(X, max_length, '空')
-    pad_sequences(Y, max_length, 'O')
-    
+    if config.task == 'pos':
+        pad_sequences(Y, max_length, 'O')
+    elif config.task == 'wordseg':
+        pad_sequences(Y, max_length, 'B')
+    print('len(tag2id):', len(tag2id))
+    print('len(char2id):', len(char2id))
     for i, y in enumerate(Y):
         for j, c in enumerate(y):
             if c not in tag2id:
