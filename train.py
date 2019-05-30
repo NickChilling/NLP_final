@@ -87,7 +87,7 @@ def train(config):
         non_increasing_epoch = 0
         init_step = sess.run(global_step)
         for i in trange(init_step, config.total_step):
-            print(i, sess.run(global_step))
+            #print(i, sess.run(global_step))
             data = sess.run(train_iter)
             data = np.array(data, dtype=np.int32)
             data = np.squeeze(data)
