@@ -112,6 +112,11 @@ def make_dataset(path, config, max_length=None):
     else:
         max_length = max(max_length, l)
     
+    if config.max_length_path is None or not os.path.exists(config.max_length_path):
+        pickle.dump(max_length, open(config.max_length_path, 'wb'))
+    else:
+        l = pickle.load(open(config.max_length_path, 'rb'))
+        max_length = max(max_length, l)
 
     if config.char2id_path is None or not os.path.exists(config.char2id_path):
         char2id, id2char = make_char2id(X)
