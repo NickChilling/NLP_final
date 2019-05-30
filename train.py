@@ -94,7 +94,8 @@ def train(config):
                 feed_dict = {model.inputs:sequences, model.tags:labels, model.lengths:sequence_lengths, \
                     model.lengths:sequence_lengths, model.dr:1}
                 loss_dev = sess.run(model.loss, feed_dict = feed_dict)
-                if loss_dev < best_performance:
+                print(loss_dev)
+                if loss_dev < best_performance-1.:
                     best_performance = loss_dev
                     non_increasing_epoch = 0
                     saver.save(sess, config.save_path)
