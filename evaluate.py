@@ -78,8 +78,7 @@ def evaluate(config):
     for i in range(len(responses)):
         for j in range(len(responses[i])):
             responses[i][j] = id2tag[int(responses[i][j])]
-
-    print(querys[0])
+ 
     print(responses[0])
 
     if config.task == 'wordseg':

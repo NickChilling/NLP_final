@@ -10,7 +10,7 @@ flags.DEFINE_integer('embedding_dim', 200, 'dimension of the character embedding
 flags.DEFINE_integer('lstm_units', 200, 'num_units of the BiLSTM layer')
 flags.DEFINE_integer('n_tags', 2, 'num of tags')
 flags.DEFINE_integer('batch_size', 50, 'batch size for training')
-flags.DEFINE_integer('early_stopping', 5, 'non increasing epochs for early stopping')
+flags.DEFINE_integer('early_stopping', 8, 'non increasing epochs for early stopping')
 flags.DEFINE_integer('total_step', 5000, 'total step of training')
 flags.DEFINE_integer('check_freq', 100, 'total step of training')
 flags.DEFINE_integer('voc', 2095, 'volume of the vocabulary')
@@ -29,14 +29,19 @@ flags.DEFINE_string('char2id_path', r'./data/wordseg/char2id.pkl', 'path of the 
 flags.DEFINE_string('tag2id_path', r'./data/wordseg/tag2id.pkl', 'path of the tag2id, serialized by pickle')
 flags.DEFINE_string('id2char_path', r'./data/wordseg/id2char.pkl', 'path of the id2char, serialized by pickle')
 flags.DEFINE_string('id2tag_path', r'./data/wordseg/id2tag.pkl', 'path of the id2tag, serialized by pickle')
-flags.DEFINE_string('save_path', r'./ckpt/wordseg', 'path to save checkpoints')
-flags.DEFINE_string('tensorboard_path', r'./tensorboard/wordseg', 'path for tensorboard')
+flags.DEFINE_string('save_path', r'./ckpt/wordseg/', 'path to save checkpoints')
+flags.DEFINE_string('tensorboard_path', r'./tensorboard/wordseg/', 'path for tensorboard')
 
 config = flags.FLAGS
 
 def main(_):
     if not os.path.exists('data/wordseg'):
         os.mkdir('data/wordseg')
+    
+    config.save_path += 'batch_size_{}_learning_rate_{}_lstm_units_{}_embedding_dim_{}/'.format(config.batch_size, config.lr, config.lstm_units, config.embedding_dim)
+    print('ckpt save path: ', config.save_path)
+    if not os.path.exists(config.save_path):
+        os.makedirs(config.save_path)
     #NOTE choose mode according to config.mode
     if config.mode == 'train':
         train(config)
