@@ -50,10 +50,14 @@ def train(config):
         tf.summary.scalar('train_loss', model.loss)
         merged_summary = tf.summary.merge_all()
 
-    saver = tf.train.Saver(max_to_keep=3)
+    #saver = tf.train.Saver(max_to_keep=3)
 
     global_step = tf.Variable(0, trainable=False, name='global_step')
     global_step_increment = tf.assign_add(global_step, 1)
+    step_holder = tf.placeholder(tf.int32, [], name='step_holder')
+    global_step_assign = tf.assign(global_step, step_holder)
+
+    saver = tf.train.Saver(max_to_keep=3)
 
     print('Initiate a session')
     with tf.Session() as sess:
@@ -65,7 +69,12 @@ def train(config):
         print('ckpt: ', ckpt, ckpt.model_checkpoint_path if ckpt else None)
         if ckpt and ckpt.model_checkpoint_path:
             saver.restore(sess, ckpt.model_checkpoint_path)
+            #sess.run(global_step_assign, feed_dict={step_holder:int(ckpt.model_checkpoint_path[ckpt.model_checkpoint_path.rfind('-')+1:])})
             print('Checkpoint has been loaded')
+            print('From step {}, start?(y/n):'.format(global_step.eval()))
+            yorn = input().strip()
+            if yorn != 'y':
+                exit()
         else:
             print('No checkpoint, start from scratch?(y/n):')
             yorn = input().strip()
@@ -77,7 +86,7 @@ def train(config):
         best_performance = 1e08
         non_increasing_epoch = 0
         init_step = sess.run(global_step)
-        for i in range(init_step, config.total_step):
+        for i in trange(init_step, config.total_step):
             print(i, sess.run(global_step))
             data = sess.run(train_iter)
             data = np.array(data, dtype=np.int32)
@@ -103,7 +112,10 @@ def train(config):
                 feed_dict = {model.inputs:sequences, model.tags:labels, model.lengths:sequence_lengths, \
                     model.lengths:sequence_lengths, model.dr:1}
                 loss_dev = sess.run(model.loss, feed_dict = feed_dict)
-                print('loss_dev({}):'.format(step), loss_dev)
+                print('dev_loss({}):'.format(step), loss_dev)
+                dev_file = open(config.save_path+'dev_loss', 'a')
+                print('dev_loss({}):'.format(step), loss_dev, file=dev_file)
+                dev_file.close()
                 if loss_dev < best_performance:
                     best_performance = loss_dev
                     non_increasing_epoch = 0
