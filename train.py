@@ -50,7 +50,7 @@ def train(config):
         tf.summary.scalar('train_loss', model.loss)
         merged_summary = tf.summary.merge_all()
 
-    saver = tf.train.Saver()
+    saver = tf.train.Saver(max_to_keep=3)
 
     global_step = tf.Variable(0, trainable=False, name='global_step')
     global_step_increment = tf.assign_add(global_step, 1)
@@ -62,8 +62,15 @@ def train(config):
         writer = tf.summary.FileWriter(config.tensorboard_path, sess.graph)
 
         ckpt = tf.train.get_checkpoint_state(config.save_path)
+        print('ckpt: ', ckpt, ckpt.model_checkpoint_path if ckpt else None)
         if ckpt and ckpt.model_checkpoint_path:
             saver.restore(sess, ckpt.model_checkpoint_path)
+            print('Checkpoint has been loaded')
+        else:
+            print('No checkpoint, start from scratch?(y/n):')
+            yorn = input().strip()
+            if yorn != 'y':
+                exit()
         print('Done')
 
         print('Start training...')
@@ -94,11 +101,14 @@ def train(config):
                 feed_dict = {model.inputs:sequences, model.tags:labels, model.lengths:sequence_lengths, \
                     model.lengths:sequence_lengths, model.dr:1}
                 loss_dev = sess.run(model.loss, feed_dict = feed_dict)
-                print(loss_dev)
+                print('loss_dev({}):'.format(step), loss_dev)
                 if loss_dev < best_performance:
                     best_performance = loss_dev
                     non_increasing_epoch = 0
-                    saver.save(sess, config.save_path)
+                    saver.save(sess, config.save_path, global_step=step)
+                    print('model has been saved in {}'.format(config.save_path))
+                    print('model has been saved in {}'.format(config.save_path))
+                    print('model has been saved in {}'.format(config.save_path))
                 else:
                     non_increasing_epoch += 1
                     if non_increasing_epoch > config.early_stopping:

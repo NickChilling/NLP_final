@@ -4,6 +4,7 @@ tensorboard*
 venv*
 
 *.bak
+*.swp
 *.pyc
 <<<<<<< HEAD
 .vscode/settings.json

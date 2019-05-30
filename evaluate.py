@@ -21,31 +21,40 @@ def evaluate(config):
 
     print('Preparing evaluate dataset....')
 
-    dataset_eva,l,_ = make_dataset(config.test1_data_path,config)
-    dataset_eva = dataset_eva.shuffle(buffer_size=1000)
-    dataset_eva = dataset_eva.batch(config.batch_size)
-    dataset_eva = dataset_eva.repeat()
+    dataset_eva,l,total = make_dataset(config.test1_data_path,config)
+    dataset_eva = dataset_eva.batch(total)
     eva_iter = dataset_eva.make_one_shot_iterator().get_next()
 
     # loading model
     result = []
     model = BilstmCrfModel(config)
     model.build()
+
+    saver = tf.train.Saver()
+
     with tf.Session() as sess:
+        sess.run(tf.global_variables_initializer())
         print('Session has been initiated')
-        saver =tf.train.import_meta_graph('./ckpt/{0}.meta'.format(config.task))
-        saver.restore(sess,config.save_path) #TODO check out
-        graph = tf.get_default_graph()
+        ckpt = tf.train.get_checkpoint_state(config.save_path)
+        if ckpt and ckpt.model_checkpoint_path:
+            saver.restore(sess, ckpt.model_checkpoint_path)
+        else:
+            raise FileNotFoundError('Find checkpoint failed')
         print('Checkpoint has been loaded')
         data = sess.run(eva_iter)
-        sequences = data[:,:1]
-        sequence_length = data[:,-1]
-        feed_dict = {model.inputs:sequences,model.lengths: sequence_length}
+        data = np.array(data, dtype=np.int32)
+        l = (data.shape[1] - 1) // 2
+        sequences = data[:1, :l]
+        labels = data[:1, l:-1]
+        sequence_lengths = data[:1, -1]
+        feed_dict = {model.inputs:sequences,model.lengths: sequence_lengths, model.dr:1}
         # predict = sess.run(model.logits,feed_dict=feed_dict)
         logits,trans_params = sess.run([model.logits, model.trans_params], feed_dict=feed_dict)
-        for logit,seq_len in zip(logits,sequence_length):
+        print(np.array(logits[:sequence_lengths[0]]).shape)
+        print(np.array(trans_params).shape)
+        for logit,seq_len in zip(logits,sequence_lengths):
             logit_actu = logit[:seq_len]
-            vitb_seq,_ = tf.contrib.crf.vitebi_decode(logit_actu,trans_params)
+            vitb_seq,_ = tf.contrib.crf.viterbi_decode(logit_actu,trans_params)
             result.append(vitb_seq)
         print(result)
         
