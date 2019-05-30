@@ -29,6 +29,7 @@ def evaluate(config):
     model = BilstmCrfModel(config)
     model.build()
 
+    global_step = tf.Variable(0, trainable=False, name='global_step')
     saver = tf.train.Saver()
 
     with tf.Session() as sess:
@@ -40,8 +41,9 @@ def evaluate(config):
         else:
             raise FileNotFoundError('Find checkpoint failed')
         print('Checkpoint has been loaded')
+        print('Step: {}'.format(global_step.eval()))
         data = sess.run(eva_iter)
-        data = np.array(data, dtype=np.int32)
+        print(data.shape)
         l = (data.shape[1] - 1) // 2
         sequences = data[:, :l]
         labels = data[:, l:-1]
@@ -63,11 +65,13 @@ def evaluate(config):
         raise FileNotFoundError('id2char is needed')
     else:
         id2char = pickle.load(open(config.id2char_path, 'rb'))
+        id2char.append('?')
 
     if config.id2tag_path is None or not os.path.exists(config.id2tag_path):
         raise FileNotFoundError('id2tag is needed')
     else:
         id2tag = pickle.load(open(config.id2tag_path, 'rb'))
+        id2tag.append('?')
     #print(len(querys), len(querys[0]), len(responses), len(responses[0]))
     #print(querys[0])
     #print(responses[0])
