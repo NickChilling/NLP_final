@@ -26,28 +26,28 @@ def evaluate(config):
     dataset_eva = dataset_eva.batch(config.batch_size)
     dataset_eva = dataset_eva.repeat()
     eva_iter = dataset_eva.make_one_shot_iterator().get_next()
-    print('giving a iteration')
 
     # loading model
     result = []
     model = BilstmCrfModel(config)
     model.build()
     with tf.Session() as sess:
+        print('Session has been initiated')
         saver =tf.train.import_meta_graph('./ckpt/{0}.meta'.format(config.task))
         saver.restore(sess,config.save_path) #TODO check out
         graph = tf.get_default_graph()
-    #     data = sess.run(eva_iter)
-    #     sequences = data[:,:1]
-    #     sequence_length = data[:,-1]
-    #     feed_dict = {model.inputs:sequences,model.lengths: sequence_length}
-    #     # predict = sess.run(model.logits,feed_dict=feed_dict)
-    #     logits,trans_params = sess.run([model.logits, model.trans_params], feed_dict=feed_dict)
-    #     for logit,seq_len in zip(logits,sequence_length):
-    #         logit_actu = logit[:seq_len]
-    #         vitb_seq,_ = tf.contrib.crf.vitebi_decode(logit_actu,trans_params)
-    #         result.append(vitb_seq)
-    # print(result)
-    # return result
+        print('Checkpoint has been loaded')
+        data = sess.run(eva_iter)
+        sequences = data[:,:1]
+        sequence_length = data[:,-1]
+        feed_dict = {model.inputs:sequences,model.lengths: sequence_length}
+        # predict = sess.run(model.logits,feed_dict=feed_dict)
+        logits,trans_params = sess.run([model.logits, model.trans_params], feed_dict=feed_dict)
+        for logit,seq_len in zip(logits,sequence_length):
+            logit_actu = logit[:seq_len]
+            vitb_seq,_ = tf.contrib.crf.vitebi_decode(logit_actu,trans_params)
+            result.append(vitb_seq)
+        print(result)
         
 
 
