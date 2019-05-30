@@ -1,4 +1,4 @@
-
+import pickle
 import numpy as np
 import os
 from tqdm import trange
@@ -26,7 +26,6 @@ def evaluate(config):
     eva_iter = dataset_eva.make_one_shot_iterator().get_next()
 
     # loading model
-    result = []
     model = BilstmCrfModel(config)
     model.build()
 
@@ -50,14 +49,42 @@ def evaluate(config):
         feed_dict = {model.inputs:sequences,model.lengths: sequence_lengths, model.dr:1}
         # predict = sess.run(model.logits,feed_dict=feed_dict)
         logits,trans_params = sess.run([model.logits, model.trans_params], feed_dict=feed_dict)
-        print(np.array(logits[:sequence_lengths[0]]).shape)
-        print(np.array(trans_params).shape)
-        for logit,seq_len in zip(logits,sequence_lengths):
+        #print(np.array(logits[:sequence_lengths[0]]).shape)
+        #print(np.array(trans_params).shape)
+        querys = []
+        responses = []
+        for logit, seq_len, sequence in zip(logits,sequence_lengths, sequences):
             logit_actu = logit[:seq_len]
             vitb_seq,_ = tf.contrib.crf.viterbi_decode(logit_actu,trans_params)
-            result.append(vitb_seq)
-        print(result)
-        
+            querys.append(list(sequence[:seq_len]))
+            responses.append(vitb_seq)
 
+    if config.id2char_path is None or not os.path.exists(config.id2char_path):
+        raise FileNotFoundError('id2char is needed')
+    else:
+        id2char = pickle.load(open(config.id2char_path, 'rb'))
 
+    if config.id2tag_path is None or not os.path.exists(config.id2tag_path):
+        raise FileNotFoundError('id2tag is needed')
+    else:
+        id2tag = pickle.load(open(config.id2tag_path, 'rb'))
+    #print(len(querys), len(querys[0]), len(responses), len(responses[0]))
+    #print(querys[0])
+    #print(responses[0])
+    for i in range(len(querys)):
+        for j in range(len(querys[i])):
+            querys[i][j] = id2char[int(querys[i][j])]
 
+    for i in range(len(responses)):
+        for j in range(len(responses[i])):
+            responses[i][j] = id2tag[int(responses[i][j])]
+
+    print(querys[0])
+    print(responses[0])
+
+    if config.task == 'wordseg':
+        raise NotImplementedError()
+    elif config.task == 'pos':
+        raise NotImplementedError()
+    else:
+        raise Exception('task should be wordseg or pos')

@@ -76,7 +76,9 @@ def train(config):
         print('Start training...')
         best_performance = 1e08
         non_increasing_epoch = 0
-        for i in trange(config.total_step - sess.run(global_step)):
+        init_step = sess.run(global_step)
+        for i in range(init_step, config.total_step):
+            print(i, sess.run(global_step))
             data = sess.run(train_iter)
             data = np.array(data, dtype=np.int32)
             data = np.squeeze(data)
@@ -105,10 +107,11 @@ def train(config):
                 if loss_dev < best_performance:
                     best_performance = loss_dev
                     non_increasing_epoch = 0
-                    saver.save(sess, config.save_path, global_step=step)
-                    print('model has been saved in {}'.format(config.save_path))
-                    print('model has been saved in {}'.format(config.save_path))
-                    print('model has been saved in {}'.format(config.save_path))
+                    if i > init_step:
+                        saver.save(sess, config.save_path, global_step=step)
+                        print('model has been saved in {}'.format(config.save_path))
+                        print('model has been saved in {}'.format(config.save_path))
+                        print('model has been saved in {}'.format(config.save_path))
                 else:
                     non_increasing_epoch += 1
                     if non_increasing_epoch > config.early_stopping:
