@@ -43,9 +43,9 @@ def evaluate(config):
         data = sess.run(eva_iter)
         data = np.array(data, dtype=np.int32)
         l = (data.shape[1] - 1) // 2
-        sequences = data[:1, :l]
-        labels = data[:1, l:-1]
-        sequence_lengths = data[:1, -1]
+        sequences = data[:, :l]
+        labels = data[:, l:-1]
+        sequence_lengths = data[:, -1]
         feed_dict = {model.inputs:sequences,model.lengths: sequence_lengths, model.dr:1}
         # predict = sess.run(model.logits,feed_dict=feed_dict)
         logits,trans_params = sess.run([model.logits, model.trans_params], feed_dict=feed_dict)
@@ -71,6 +71,7 @@ def evaluate(config):
     #print(len(querys), len(querys[0]), len(responses), len(responses[0]))
     #print(querys[0])
     #print(responses[0])
+    assert(len(querys) == len(responses))
     for i in range(len(querys)):
         for j in range(len(querys[i])):
             querys[i][j] = id2char[int(querys[i][j])]
@@ -81,9 +82,22 @@ def evaluate(config):
 
     print(querys[0])
     print(responses[0])
-
     if config.task == 'wordseg':
-        raise NotImplementedError()
+        out_file = open('wordseg_test.txt', 'w')
+        for i in range(len(responses)):
+            first = True
+            word = []
+            for q, r in zip(querys[i], responses[i]):
+                if first:
+                    r = 'B'
+                else:
+                    if r == 'B':
+                        out_file.write(''.join(word) + ' ')
+                        word = [q]
+                    else:
+                        word.append(q)
+            out_file.write('\n')
+                        
     elif config.task == 'pos':
         raise NotImplementedError()
     else:
