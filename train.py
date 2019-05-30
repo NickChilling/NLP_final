@@ -23,14 +23,17 @@ def train(config):
     
     print('Preparing dataset...')
     #generate train and dev dataset
-    dataset_train, l, _ = make_dataset(config.train_data_path, config)
+    dataset_train, l, train_total = make_dataset(config.train_data_path, config)
     dataset_train = dataset_train.shuffle(buffer_size=1000)
     dataset_train = dataset_train.batch(config.batch_size)
     dataset_train = dataset_train.repeat()
     train_iter = dataset_train.make_one_shot_iterator().get_next()
     dataset_dev, _, dev_total = make_dataset(config.dev_data_path, config, l)
     dataset_dev = dataset_dev.batch(dev_total)
+    dataset_dev = dataset_dev.repeat()
     dev_iter = dataset_dev.make_one_shot_iterator().get_next()
+    print('Size of training set', train_total)
+    print('Size of dev set', dev_total)
     print('Done')
 
     print('Initiate model...')
@@ -105,7 +108,7 @@ def train(config):
                 summary = sess.run(merged_summary, feed_dict = feed_dict)
                 writer.add_summary(summary, step)
                 data = sess.run(dev_iter)
-                print(data.shape)
+                print('Shape of dev data:', data.shape)
                 sequences = data[:, :l]
                 labels = data[:,l:-1]
                 sequence_lengths = data[:, -1]

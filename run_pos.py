@@ -53,10 +53,11 @@ def main(_):
 
     
 if __name__ == '__main__':
-    try:
+    '''try:
         tf.app.run()
     #except SystemExit:
     except Exception as e:
         print(e)
-        print('Done')
+        print('Done')'''
+    tf.app.run()
 
