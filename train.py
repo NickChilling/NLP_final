@@ -28,9 +28,8 @@ def train(config):
     dataset_train = dataset_train.batch(config.batch_size)
     dataset_train = dataset_train.repeat()
     train_iter = dataset_train.make_one_shot_iterator().get_next()
-    dataset_dev, _, _ = make_dataset(config.dev_data_path, config, l)
-    dataset_dev = dataset_dev.batch(1000)
-    dataset_dev = dataset_dev.repeat()
+    dataset_dev, _, dev_total = make_dataset(config.dev_data_path, config, l)
+    dataset_dev = dataset_dev.batch(dev_total)
     dev_iter = dataset_dev.make_one_shot_iterator().get_next()
     print('Done')
 
@@ -97,7 +96,7 @@ def train(config):
             sequence_lengths = data[:, -1]
             
             feed_dict = {model.inputs:sequences, model.tags:labels, model.lengths:sequence_lengths, \
-                model.lengths:sequence_lengths, model.dr:config.dr}
+                model.dr:config.dr}
             
             _, step = sess.run([model.train_op, global_step], feed_dict = feed_dict)
             sess.run(global_step_increment)
@@ -106,11 +105,12 @@ def train(config):
                 summary = sess.run(merged_summary, feed_dict = feed_dict)
                 writer.add_summary(summary, step)
                 data = sess.run(dev_iter)
+                print(data.shape)
                 sequences = data[:, :l]
                 labels = data[:,l:-1]
                 sequence_lengths = data[:, -1]
                 feed_dict = {model.inputs:sequences, model.tags:labels, model.lengths:sequence_lengths, \
-                    model.lengths:sequence_lengths, model.dr:1}
+                    model.dr:1}
                 loss_dev = sess.run(model.loss, feed_dict = feed_dict)
                 print('dev_loss({}):'.format(step), loss_dev)
                 dev_file = open(config.save_path+'dev_loss', 'a')
