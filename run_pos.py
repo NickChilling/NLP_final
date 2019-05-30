@@ -9,15 +9,15 @@ flags = tf.app.flags
 flags.DEFINE_integer('embedding_dim', 200, 'dimension of the character embedding')
 flags.DEFINE_integer('lstm_units', 200, 'num_units of the BiLSTM layer')
 flags.DEFINE_integer('n_tags', 66, 'num of tags')
-flags.DEFINE_integer('batch_size', 50, 'batch size for training')
+flags.DEFINE_integer('batch_size', 32, 'batch size for training')
 flags.DEFINE_integer('early_stopping', 10, 'non increasing epochs for early stopping')
-flags.DEFINE_integer('total_step', 100000, 'total step of training')
-flags.DEFINE_integer('check_freq', 500, 'total step of training')
+flags.DEFINE_integer('total_step', 10000, 'total step of training')
+flags.DEFINE_integer('check_freq', 100, 'total step of training')
 flags.DEFINE_integer('voc', 2095, 'volume of the vocabulary')
 flags.DEFINE_float('lr', 0.001, 'learning rate')
 flags.DEFINE_float('dr', 0.5, 'dropout rate')
 flags.DEFINE_string('task', 'pos', 'task: "wordseg" or "pos"')
-flags.DEFINE_string('mode', 'train', 'running mode: "train", "evaluate" or "all"')
+flags.DEFINE_string('mode', 'evaluate', 'running mode: "train", "evaluate" or "all"')
 flags.DEFINE_string('model', 'bilstm-crf', 'bilstm-crf or self-attention-crf')
 flags.DEFINE_string('raw_train_data_path', r'./data/trainset/train_pos.txt', 'path of the raw train data')
 flags.DEFINE_string('raw_dev_data_path', r'./data/devset/val_pos.txt', 'path of the raw dev data')
@@ -52,6 +52,8 @@ def main(_):
 if __name__ == '__main__':
     try:
         tf.app.run()
-    except SystemExit:
+    #except SystemExit:
+    except Exception as e:
+        print(e)
         print('Done')
 

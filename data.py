@@ -1,3 +1,6 @@
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 from collections import defaultdict
 from collections import Iterable
 import numpy as np 
@@ -63,7 +66,7 @@ def process_raw(config):
                         for i, c in enumerate(word):
                             charactors.append(c)
                             if i == 0:
-                                tags.append('B')
+                                tags.append('B') #TODO 这里可以修改一下O标记
                             else:
                                 tags.append('I')
                     if len(charactors) != len(tags):
@@ -72,7 +75,7 @@ def process_raw(config):
                         print(tags)
                         raise Exception('len(charactors) != len(tags)')
                     for charactor, tag in zip(charactors, tags):
-                        print(charactor, tag, file=g)
+                        print(charactor, tag, file=g)#TODO 这里是怎么存储的
                     print(file=g)
             else:
                 raise Exception('Wrong argument: task should be "wordseg" or "pos"')
@@ -136,7 +139,7 @@ def make_dataset(path, config, max_length=None):
     if config.task == 'pos':
         pad_sequences(Y, max_length, 'O')
     elif config.task == 'wordseg':
-        pad_sequences(Y, max_length, 'B')
+        pad_sequences(Y, max_length, 'B') #TODO 为啥这里是B
     print('len(tag2id):', len(tag2id))
     print('len(char2id):', len(char2id))
     for i, y in enumerate(Y):
