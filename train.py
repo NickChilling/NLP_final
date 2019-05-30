@@ -86,7 +86,7 @@ def train(config):
         best_performance = 1e08
         non_increasing_epoch = 0
         init_step = sess.run(global_step)
-        for i in range(init_step, config.total_step):
+        for i in trange(init_step, config.total_step):
             print(i, sess.run(global_step))
             data = sess.run(train_iter)
             data = np.array(data, dtype=np.int32)
@@ -114,7 +114,7 @@ def train(config):
                 loss_dev = sess.run(model.loss, feed_dict = feed_dict)
                 print('dev_loss({}):'.format(step), loss_dev)
                 dev_file = open(config.save_path+'dev_loss', 'a')
-                print('dev_loss({}):'.format(step), loss_dev, out_file=dev_file)
+                print('dev_loss({}):'.format(step), loss_dev, file=dev_file)
                 dev_file.close()
                 if loss_dev < best_performance:
                     best_performance = loss_dev
