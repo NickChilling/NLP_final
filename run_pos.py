@@ -29,14 +29,8 @@ flags.DEFINE_string('char2id_path', r'./data/pos/char2id.pkl', 'path of the char
 flags.DEFINE_string('tag2id_path', r'./data/pos/tag2id.pkl', 'path of the tag2id, serialized by pickle')
 flags.DEFINE_string('id2char_path', r'./data/pos/id2char.pkl', 'path of the id2char, serialized by pickle')
 flags.DEFINE_string('id2tag_path', r'./data/pos/id2tag.pkl', 'path of the id2tag, serialized by pickle')
-<<<<<<< HEAD
-flags.DEFINE_string('max_length_path', r'./data/pos/max_length.pkl', 'path of the max_length, serialized by pickle')
-flags.DEFINE_string('save_path', r'./ckpt/pos', 'path to save checkpoints')
-flags.DEFINE_string('tensorboard_path', r'./tensorboard/pos', 'path for tensorboard')
-=======
 flags.DEFINE_string('save_path', r'./ckpt/pos/', 'path to save checkpoints')
 flags.DEFINE_string('tensorboard_path', r'./tensorboard/pos/', 'path for tensorboard')
->>>>>>> a015b8d2c035fecf5dc1ebd5b8610f66d51a82bf
 
 config = flags.FLAGS
 
@@ -51,8 +45,9 @@ def main(_):
         train(config)
     elif config.mode == 'evaluate':
         evaluate(config)
-    elif config.mode == 'all':
-        train(config)
+    elif config.mode == 'test':
+        config.raw_test2_data_path = './test2.txt'
+        config.test2_data_path = './test2_data'
         evaluate(config)
     else:
         raise ValueError('Invalid mode {}'.format(config.mode))
