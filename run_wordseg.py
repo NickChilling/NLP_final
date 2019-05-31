@@ -7,17 +7,17 @@ from evaluate import evaluate
 flags = tf.app.flags
 #NOTE setting flags 
 flags.DEFINE_integer('embedding_dim', 200, 'dimension of the character embedding')
-flags.DEFINE_integer('lstm_units', 200, 'num_units of the BiLSTM layer')
+flags.DEFINE_integer('lstm_units', 150, 'num_units of the BiLSTM layer')
 flags.DEFINE_integer('n_tags', 2, 'num of tags')
-flags.DEFINE_integer('batch_size', 50, 'batch size for training')
-flags.DEFINE_integer('early_stopping', 8, 'non increasing epochs for early stopping')
-flags.DEFINE_integer('total_step', 5000, 'total step of training')
-flags.DEFINE_integer('check_freq', 100, 'total step of training')
+flags.DEFINE_integer('batch_size', 4, 'batch size for training')
+flags.DEFINE_integer('early_stopping', 5, 'non increasing epochs for early stopping')
+flags.DEFINE_integer('total_step', 10000, 'total step of training')
+flags.DEFINE_integer('check_freq', 50, 'total step of training')
 flags.DEFINE_integer('voc', 2095, 'volume of the vocabulary')
 flags.DEFINE_float('lr', 0.001, 'learning rate')
 flags.DEFINE_float('dr', 0.5, 'dropout rate')
 flags.DEFINE_string('task', 'wordseg', 'task: "wordseg" or "pos"')
-flags.DEFINE_string('mode', 'evaluate', 'running mode: "train", "evaluate" or "all"')
+flags.DEFINE_string('mode', 'train', 'running mode: "train", "evaluate" or "all"')
 flags.DEFINE_string('model', 'bilstm-crf', 'bilstm-crf or self-attention-crf')
 flags.DEFINE_string('raw_train_data_path', r'./data/trainset/train_cws.txt', 'path of the raw train data')
 flags.DEFINE_string('raw_dev_data_path', r'./data/devset/val_cws.txt', 'path of the raw dev data')
@@ -37,8 +37,7 @@ config = flags.FLAGS
 def main(_):
     if not os.path.exists('data/wordseg'):
         os.mkdir('data/wordseg')
-    
-    config.save_path += 'batch_size_{}_learning_rate_{}_lstm_units_{}_embedding_dim_{}/'.format(config.batch_size, config.lr, config.lstm_units, config.embedding_dim)
+    config.save_path += 'batch_size_{}_learning_rate_{}_lstm_units_{}_embedding_dim_{}_early_stop_250_check_freq{}_1/'.format(config.batch_size, config.lr, config.lstm_units, config.embedding_dim,config.check_freq)
     print('ckpt save path: ', config.save_path)
     if not os.path.exists(config.save_path):
         os.makedirs(config.save_path)
@@ -59,7 +58,4 @@ if __name__ == '__main__':
         tf.app.run()
     except SystemExit:
         print('Done')
-
-
-
-
+ 

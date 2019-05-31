@@ -89,22 +89,23 @@ def evaluate(config):
     print(querys[1])
     print(responses[1])
     if config.task == 'wordseg':
-        out_file = open('wordseg_test.txt', 'w')
-        for i in range(len(responses)):
-            first = True
-            word = []
-            for q, r in zip(querys[i], responses[i]):
-                if first:
-                    r = 'B'
-                if r == 'B':
-                    out_file.write(''.join(word))
-                    if not first:
-                        out_file.write(' ')
-                    word = [q]
-                else:
-                    word.append(q)
-                first = False
-            out_file.write('\n')
+        with open('wordseg_test.txt', 'w',encoding='utf-8') as out_file:
+            for i in range(len(responses)):
+                first = True
+                word = []
+                for q, r in zip(querys[i], responses[i]):
+                    if first:
+                        r = 'B'
+                    if r == 'B':
+                        out_file.write(''.join(word))
+                        if not first:
+                            out_file.write(' ')
+                        word = [q]
+                    else:
+                        word.append(q)
+                    first = False
+                out_file.write('\n')
+        word_seg_score(config.raw_test1_data_path,'wordseg_test.txt')
     elif config.task == 'pos':
         out_file = open('pos_test.txt', 'w')
         for i in range(len(responses)):
@@ -142,3 +143,48 @@ def evaluate(config):
                 print('    its tag:', responses[i])
     else:
         raise Exception('task should be wordseg or pos')
+
+def word_seg_score(test_path,result_path):
+    with open(test_path,'r',encoding='utf-8') as test,open(result_path,'r',encoding='utf-8') as results:
+        result_lines = results.readlines()
+        test_lines = test.readlines()
+        print(len(result_lines),len(test_lines))
+        assert len(result_lines)==len(test_lines)
+        total_word = 0
+        true_word = 0
+        predict_word = 0
+        for line_index in range(len(result_lines)):
+            result_line = result_lines[line_index]
+            test_line = test_lines[line_index]
+            tc_start = 0
+            rc_start = 0
+            result_set = set()
+            test_set = set()
+            while tc_start < len(test_line):
+                tc_end = tc_start
+                while tc_end<len(test_line) and test_line[tc_end]!=' ':
+                    tc_end+=1
+                total_word +=1
+                test_word = (tc_start,tc_end)
+                test_set.add(test_word)
+                tc_start = tc_end+1
+
+            while rc_start <len(result_line):
+                rc_end = rc_start
+                while rc_end<len(result_line) and result_line[rc_end]!=' ':
+                    rc_end+=1
+                result_word = (rc_start,rc_end)
+                result_set.add(result_word)
+                rc_start = rc_end+1
+            line_true_word = len(test_set&result_set)
+            true_word += line_true_word
+            line_pred_word = len(result_set)
+            predict_word += line_pred_word
+        precision = true_word/total_word
+        recall = true_word/predict_word
+        f1 = 2*precision*recall/(precision+recall)
+        print('precision',precision)
+        print('recall',recall)
+        print('f1',f1)
+            
+                 
