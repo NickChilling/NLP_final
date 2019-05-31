@@ -24,6 +24,7 @@ def evaluate(config):
     dataset_eva,l,total = make_dataset(config.test1_data_path,config)
     dataset_eva = dataset_eva.batch(total)
     eva_iter = dataset_eva.make_one_shot_iterator().get_next()
+    print('size of test set: {}'.format(total))
 
     # loading model
     model = BilstmCrfModel(config)
@@ -43,7 +44,7 @@ def evaluate(config):
         print('Checkpoint has been loaded')
         print('Step: {}'.format(global_step.eval()))
         data = sess.run(eva_iter)
-        print(data.shape)
+        print('Shape of data:', data.shape)
         l = (data.shape[1] - 1) // 2
         sequences = data[:, :l]
         labels = data[:, l:-1]
@@ -85,6 +86,8 @@ def evaluate(config):
             responses[i][j] = id2tag[int(responses[i][j])]
  
     print(responses[0])
+    print(querys[1])
+    print(responses[1])
     if config.task == 'wordseg':
         out_file = open('wordseg_test.txt', 'w')
         for i in range(len(responses)):
@@ -93,15 +96,49 @@ def evaluate(config):
             for q, r in zip(querys[i], responses[i]):
                 if first:
                     r = 'B'
+                if r == 'B':
+                    out_file.write(''.join(word))
+                    if not first:
+                        out_file.write(' ')
+                    word = [q]
                 else:
-                    if r == 'B':
-                        out_file.write(''.join(word) + ' ')
-                        word = [q]
-                    else:
-                        word.append(q)
+                    word.append(q)
+                first = False
             out_file.write('\n')
-                        
     elif config.task == 'pos':
-        raise NotImplementedError()
+        out_file = open('pos_test.txt', 'w')
+        for i in range(len(responses)):
+            first = True
+            correct = True
+            word = []
+            word_start = '?'
+            for q, r in zip(querys[i], responses[i]):
+                if first and r[0] == 'I':
+                    r = 'B' + r[1:]
+                if r == 'O':
+                    if word_start == 'O':
+                        word.append(q)
+                    elif word_start == '?':
+                        word_start = r
+                        word.append(q)
+                    else:
+                        out_file.write(''.join(word) + (('/'+word_start[2:]) if word_start != 'O' else '') + ' ')
+                        word = [q]
+                        word_start = 'O'
+                elif r[0] == 'B':
+                    out_file.write(''.join(word))
+                    if not first:
+                        out_file.write((('/'+word_start[2:]) if word_start != 'O' else '') + ' ')
+                    word = [q]
+                    word_start = r
+                else:
+                    word.append(q)
+                    if r[1:] != word_start[1:]:
+                        correct = False
+                first = False
+            out_file.write('\n')
+            if not correct:
+                print('Wrong sentence:', querys[i])
+                print('    its tag:', responses[i])
     else:
         raise Exception('task should be wordseg or pos')
