@@ -3,7 +3,9 @@ __pycache__*
 tensorboard*
 venv*
 
+*test.txt
 *.bak
+*.swp
 *.pyc
 <<<<<<< HEAD
 .vscode/settings.json

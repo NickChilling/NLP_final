@@ -89,6 +89,7 @@ def make_dataset(path, config, max_length=None):
     lengths = []
     sentence = []
     labels = []
+    total = 0
 
     for line in open(path, encoding='utf-8'):
         line = line.strip()
@@ -104,6 +105,7 @@ def make_dataset(path, config, max_length=None):
                 lengths.append(l)
                 sentence = []
                 labels = []
+                total += 1
             else:
                 print(X)
                 print(Y)
@@ -140,12 +142,12 @@ def make_dataset(path, config, max_length=None):
         pad_sequences(Y, max_length, 'O')
     elif config.task == 'wordseg':
         pad_sequences(Y, max_length, 'B') #TODO 为啥这里是B
-    print('len(tag2id):', len(tag2id))
-    print('len(char2id):', len(char2id))
+    #print('len(tag2id):', len(tag2id))
+    #print('len(char2id):', len(char2id))
     for i, y in enumerate(Y):
         for j, c in enumerate(y):
             if c not in tag2id:
-                raise Exception
+                raise Exception()
 
     transform_w2id(X, char2id)
     transform_w2id(Y, tag2id)
@@ -154,7 +156,7 @@ def make_dataset(path, config, max_length=None):
     lengths = np.expand_dims(lengths, -1)
     data = np.concatenate((X, Y, lengths), axis=1)
     
-    return tf.data.Dataset.from_tensor_slices(data), max_length, len(char2id)
+    return tf.data.Dataset.from_tensor_slices(data), max_length, total
 
 def make_char2id(X):
     '''X is a 2d list
