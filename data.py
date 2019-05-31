@@ -15,7 +15,7 @@ def process_raw(config):
     '''transform raw data into BIO form'''
 
     print('Start processing raw data...')
-    if config.task == 'test':
+    if config.mode == 'test':
         with open(config.raw_test2_data_path) as f, open(config.test2_data_path, 'w') as g:
             for line in f:
                 if line.strip() == '':
@@ -33,7 +33,8 @@ def process_raw(config):
                 for charactor, tag in zip(charactors, tags):
                     print(charactor, tag, file=g)
                 print(file=g)
-
+        return
+    print('====================================================')
     with open(config.raw_train_data_path, 'r', encoding='utf-8') as raw_train, \
         open(config.raw_dev_data_path, 'r', encoding='utf-8') as raw_dev, \
         open(config.raw_test1_data_path, 'r', encoding='utf-8') as raw_test, \
