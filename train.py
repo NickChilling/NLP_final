@@ -59,7 +59,7 @@ def train(config):
     step_holder = tf.placeholder(tf.int32, [], name='step_holder')
     global_step_assign = tf.assign(global_step, step_holder)
 
-    saver = tf.train.Saver(max_to_keep=3)
+    saver = tf.train.Saver(max_to_keep=2)
 
     print('Initiate a session')
     with tf.Session() as sess:

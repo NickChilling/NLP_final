@@ -3,6 +3,7 @@ import numpy as np
 import os
 from tqdm import trange
 import tensorflow as tf 
+import time
 
 from data import process_raw 
 from data import make_dataset
@@ -32,6 +33,7 @@ def evaluate(config):
 
     global_step = tf.Variable(0, trainable=False, name='global_step')
     saver = tf.train.Saver()
+    #global_step = tf.Variable(5300, trainable=False, name='global_step')
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
@@ -129,7 +131,7 @@ def evaluate(config):
                 elif r[0] == 'B':
                     out_file.write(''.join(word))
                     if not first:
-                        out_file.write((('/'+word_start[2:]) if word_start != 'O' else '') + ' ')
+                        out_file.write((('/'+word_start[2:]).lower() if word_start != 'O' else '') + ' ')
                     word = [q]
                     word_start = r
                 else:
@@ -141,6 +143,11 @@ def evaluate(config):
             if not correct:
                 print('Wrong sentence:', querys[i])
                 print('    its tag:', responses[i])
+        out_file.close()
+        print('Start pos_evaluate.py...')
+        time.sleep(1)
+        os.system('python pos_evaluate.py')
+        time.sleep(3)
     else:
         raise Exception('task should be wordseg or pos')
 

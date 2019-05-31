@@ -15,6 +15,26 @@ def process_raw(config):
     '''transform raw data into BIO form'''
 
     print('Start processing raw data...')
+    if config.mode == 'test':
+        with open(config.raw_test2_data_path) as f, open(config.test2_data_path, 'w') as g:
+            for line in f:
+                if line.strip() == '':
+                    continue
+                charactors = []
+                tags = []
+                for i, c in enumerate(line):
+                    charactors.append(c)
+                    tags.append('?')
+                if len(charactors) != len(tags):
+                    print(line)
+                    print(charactors)
+                    print(tags)
+                    raise Exception('len(charactors) != len(tags)')
+                for charactor, tag in zip(charactors, tags):
+                    print(charactor, tag, file=g)
+                print(file=g)
+        return
+    print('====================================================')
     with open(config.raw_train_data_path, 'r', encoding='utf-8') as raw_train, \
         open(config.raw_dev_data_path, 'r', encoding='utf-8') as raw_dev, \
         open(config.raw_test1_data_path, 'r', encoding='utf-8') as raw_test, \
@@ -66,7 +86,7 @@ def process_raw(config):
                         for i, c in enumerate(word):
                             charactors.append(c)
                             if i == 0:
-                                tags.append('B') #TODO 这里可以修改一下O标记
+                                tags.append('B') 
                             else:
                                 tags.append('I')
                     if len(charactors) != len(tags):
@@ -75,7 +95,7 @@ def process_raw(config):
                         print(tags)
                         raise Exception('len(charactors) != len(tags)')
                     for charactor, tag in zip(charactors, tags):
-                        print(charactor, tag, file=g)#TODO 这里是怎么存储的
+                        print(charactor, tag, file=g)
                     print(file=g)
             else:
                 raise Exception('Wrong argument: task should be "wordseg" or "pos"')
@@ -117,6 +137,11 @@ def make_dataset(path, config, max_length=None):
     else:
         max_length = max(max_length, l)
     
+    if config.max_length_path is None or not os.path.exists(config.max_length_path):
+        pickle.dump(max_length, open(config.max_length_path, 'wb'))
+    else:
+        l = pickle.load(open(config.max_length_path, 'rb'))
+        max_length = max(max_length, l)
 
     if config.char2id_path is None or not os.path.exists(config.char2id_path):
         char2id, id2char = make_char2id(X)
@@ -136,7 +161,7 @@ def make_dataset(path, config, max_length=None):
     if config.task == 'pos':
         pad_sequences(Y, max_length, 'O')
     elif config.task == 'wordseg':
-        pad_sequences(Y, max_length, 'B') #TODO 为啥这里是B
+        pad_sequences(Y, max_length, 'B') 
     #print('len(tag2id):', len(tag2id))
     #print('len(char2id):', len(char2id))
     for i, y in enumerate(Y):
