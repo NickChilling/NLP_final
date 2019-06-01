@@ -16,7 +16,7 @@ def process_raw(config):
 
     print('Start processing raw data...')
     if config.mode == 'test':
-        with open(config.raw_test2_data_path) as f, open(config.test2_data_path, 'w') as g:
+        with open(config.raw_test2_data_path, encoding='utf-8') as f, open(config.test2_data_path, 'w', encoding='utf-8') as g:
             for line in f:
                 if line.strip() == '':
                     continue
@@ -60,6 +60,10 @@ def process_raw(config):
                             #print(orig)
                             #print(unit)
                             continue
+                        '''len_word = len(word)
+                        if len_word == 1:
+                            charactors.append(word)
+                            tags.append('S-{}'.format(pos.upper()))'''
                         for i, c in enumerate(word):
                             charactors.append(c)
                             if i == 0:
@@ -83,10 +87,17 @@ def process_raw(config):
                     orig = line
                     line = line.strip().split()
                     for word in line:
+                        len_word = len(word)
+                        if len_word == 1:
+                            charactors.append(word)
+                            tags.append('S')
+                            continue
                         for i, c in enumerate(word):
                             charactors.append(c)
                             if i == 0:
-                                tags.append('B') 
+                                tags.append('B')
+                            elif i == len_word - 1:
+                                tags.append('E')
                             else:
                                 tags.append('I')
                     if len(charactors) != len(tags):

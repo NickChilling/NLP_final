@@ -6,18 +6,18 @@ from evaluate import evaluate
 
 flags = tf.app.flags
 
-flags.DEFINE_integer('embedding_dim', 400, 'dimension of the character embedding')
+flags.DEFINE_integer('embedding_dim', 200, 'dimension of the character embedding')
 flags.DEFINE_integer('lstm_units', 100, 'num_units of the BiLSTM layer')
-flags.DEFINE_integer('n_tags', 66, 'num of tags')
+flags.DEFINE_integer('n_tags', 4, 'num of tags')
 flags.DEFINE_integer('batch_size', 8, 'batch size for training')
 flags.DEFINE_integer('early_stopping', 10, 'non increasing epochs for early stopping')
 flags.DEFINE_integer('total_step', 10000, 'total step of training')
 flags.DEFINE_integer('check_freq', 100, 'total step of training')
 flags.DEFINE_integer('voc', 2095, 'volume of the vocabulary')
 flags.DEFINE_float('lr', 0.001, 'learning rate')
-flags.DEFINE_float('dr', 0.5, 'dropout rate')
+flags.DEFINE_float('dr', 0.65, 'dropout keep rate')
 flags.DEFINE_string('task', 'pos', 'task: "wordseg" or "pos"')
-flags.DEFINE_string('mode', 'evaluate', 'running mode: "train", "evaluate" or "all"')
+flags.DEFINE_string('mode', 'train', 'running mode: "train", "evaluate"')
 flags.DEFINE_string('model', 'bilstm-crf', 'bilstm-crf or self-attention-crf')
 flags.DEFINE_string('raw_train_data_path', r'./data/trainset/train_pos.txt', 'path of the raw train data')
 flags.DEFINE_string('raw_dev_data_path', r'./data/devset/val_pos.txt', 'path of the raw dev data')
@@ -36,8 +36,8 @@ flags.DEFINE_string('tensorboard_path', r'./tensorboard/pos/', 'path for tensorb
 config = flags.FLAGS
 
 def main(_):
-    config.save_path += 'batch_size:{},learning_rate:{},lstm_units:{},embedding_dim:{}/'.format(config.batch_size, config.lr, config.lstm_units, config.embedding_dim)
-    config.tensorboard_path += 'batch_size:{},learning_rate:{},lstm_units:{},embedding_dim:{}/'.format(config.batch_size, config.lr, config.lstm_units, config.embedding_dim)
+    config.save_path += 'batch_size{},learning_rate{},lstm_units{},embedding_dim{}/'.format(config.batch_size, config.lr, config.lstm_units, config.embedding_dim)
+    config.tensorboard_path += 'batch_size{},learning_rate{},lstm_units{},embedding_dim{}/'.format(config.batch_size, config.lr, config.lstm_units, config.embedding_dim)
     print('ckpt save path: ', config.save_path)
     print('tensorboard logdir: ', config.tensorboard_path)
     if not os.path.exists(config.save_path):
