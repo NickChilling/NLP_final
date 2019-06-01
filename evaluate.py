@@ -91,10 +91,11 @@ def evaluate(config):
     print(querys[1])
     print(responses[1])
     if config.task == 'wordseg':
-        with open('wordseg_test.txt', 'w',encoding='utf-8') as out_file:
+        with open('wordseg_test2.txt', 'w',encoding='utf-8') as out_file:
             for i in range(len(responses)):
                 first = True
                 word = []
+                last_word = []
                 for q, r in zip(querys[i], responses[i]):
                     if first:
                         r = 'B'
@@ -103,11 +104,14 @@ def evaluate(config):
                         if not first:
                             out_file.write(' ')
                         word = [q]
+                        last_word =[q]
                     else:
                         word.append(q)
+                        last_word.append(q)
                     first = False
+                out_file.write(''.join(last_word))
                 out_file.write('\n')
-        word_seg_score(config.raw_test1_data_path,'wordseg_test.txt')
+        # word_seg_score(config.raw_test1_data_path,'wordseg_test.txt')
     elif config.task == 'pos':
         out_file = open('pos_test.txt', 'w')
         for i in range(len(responses)):

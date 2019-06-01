@@ -16,15 +16,16 @@ def process_raw(config):
 
     print('Start processing raw data...')
     if config.mode == 'test':
-        with open(config.raw_test2_data_path) as f, open(config.test2_data_path, 'w') as g:
+        with open(config.raw_test2_data_path,encoding='utf-8') as f, open(config.test2_data_path, 'w',encoding='utf-8') as g:
             for line in f:
                 if line.strip() == '':
                     continue
+                line=line.strip()
                 charactors = []
                 tags = []
                 for i, c in enumerate(line):
                     charactors.append(c)
-                    tags.append('?')
+                    tags.append('B')
                 if len(charactors) != len(tags):
                     print(line)
                     print(charactors)
@@ -138,22 +139,22 @@ def make_dataset(path, config, max_length=None):
         max_length = max(max_length, l)
     
     if config.max_length_path is None or not os.path.exists(config.max_length_path):
-        pickle.dump(max_length, open(config.max_length_path, 'wb'))
+        pickle.dump(max_length, open(config.max_length_path, 'wb',encoding='utf-8'))
     else:
         l = pickle.load(open(config.max_length_path, 'rb'))
         max_length = max(max_length, l)
 
     if config.char2id_path is None or not os.path.exists(config.char2id_path):
         char2id, id2char = make_char2id(X)
-        pickle.dump(char2id, open(config.char2id_path, 'wb'))
-        pickle.dump(id2char, open(config.id2char_path, 'wb'))
+        pickle.dump(char2id, open(config.char2id_path, 'wb',encoding='utf-8'))
+        pickle.dump(id2char, open(config.id2char_path, 'wb',encoding='utf-8'))
     else:
         char2id = pickle.load(open(config.char2id_path, 'rb'))
 
     if config.tag2id_path is None or not os.path.exists(config.tag2id_path):
         tag2id, id2tag = make_tag2id(Y)
-        pickle.dump(tag2id, open(config.tag2id_path, 'wb'))
-        pickle.dump(id2tag, open(config.id2tag_path, 'wb'))
+        pickle.dump(tag2id, open(config.tag2id_path, 'wb',encoding='utf-8'))
+        pickle.dump(id2tag, open(config.id2tag_path, 'wb',encoding='utf-8'))
     else:
         tag2id = pickle.load(open(config.tag2id_path, 'rb'))
 
@@ -162,8 +163,8 @@ def make_dataset(path, config, max_length=None):
         pad_sequences(Y, max_length, 'O')
     elif config.task == 'wordseg':
         pad_sequences(Y, max_length, 'B') 
-    #print('len(tag2id):', len(tag2id))
-    #print('len(char2id):', len(char2id))
+    print('len(tag2id):', len(tag2id))
+    print('len(char2id):', len(char2id))
     for i, y in enumerate(Y):
         for j, c in enumerate(y):
             if c not in tag2id:
