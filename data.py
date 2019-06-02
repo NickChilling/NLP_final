@@ -20,11 +20,12 @@ def process_raw(config):
             for line in f:
                 if line.strip() == '':
                     continue
+                line = line.strip()
                 charactors = []
                 tags = []
                 for i, c in enumerate(line):
                     charactors.append(c)
-                    tags.append('?')
+                    tags.append('O')
                 if len(charactors) != len(tags):
                     print(line)
                     print(charactors)

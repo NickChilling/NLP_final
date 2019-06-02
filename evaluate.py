@@ -143,6 +143,7 @@ def evaluate(config):
         time.sleep(3)
     elif config.task == 'pos':
         out_file = open('pos_test.txt', 'w', encoding='utf-8')
+        out_file_ws = open('wordseg_test.txt', 'w', encoding='utf-8')
         for i in range(len(responses)):
             first = True
             correct = True
@@ -159,12 +160,15 @@ def evaluate(config):
                         word.append(q)
                     else:
                         out_file.write(''.join(word) + (('/'+word_start[2:]) if word_start != 'O' else '') + ' ')
+                        out_file_ws.write(''.join(word) + ' ')
                         word = [q]
                         word_start = 'O'
                 elif r[0] == 'B':
                     out_file.write(''.join(word))
+                    out_file_ws.write(''.join(word))
                     if len(word) > 0:
                         out_file.write((('/'+word_start[2:]).lower() if word_start != 'O' else '') + ' ')
+                        out_file_ws.write(' ')
                     word = [q]
                     word_start = r
                 else:
@@ -172,16 +176,24 @@ def evaluate(config):
                     if r[1:] != word_start[1:]:
                         correct = False
                 first = False
-            out_file.write(''.join(word) + (('/'+word_start[2:]) if word_start != 'O' else ''))
+            out_file.write(''.join(word) + (('/'+word_start[2:]).lower() if word_start != 'O' else ''))
             out_file.write('\n')
+            out_file_ws.write(''.join(word))
+            out_file_ws.write('\n')
             if False:
             #if not correct:
                 print('Wrong sentence:', querys[i])
                 print('    its tag:', responses[i])
         out_file.close()
+        out_file_ws.close()
         print('Start pos_evaluate.py...')
         time.sleep(1)
         os.system('python pos_evaluate.py')
+        time.sleep(3)
+        print('----------------------------------------')
+        print('Start wordseg_evaluate.py...')
+        time.sleep(1)
+        os.system('python wordseg_evaluate.py')
         time.sleep(3)
     else:
         raise Exception('task should be wordseg or pos')
