@@ -21,13 +21,17 @@ class BilstmCrfModel(object):
             embedded = tf.nn.embedding_lookup(self.embedding, self.inputs, name='embedded')  
             embedded = tf.nn.dropout(embedded, self.dr)
         
-        with tf.name_scope('lstm-layer'):
-            fw_cell = tf.nn.rnn_cell.LSTMCell(self.config.lstm_units)
-            bw_cell = tf.nn.rnn_cell.LSTMCell(self.config.lstm_units)
-            (fw_output, bw_output), _ = tf.nn.bidirectional_dynamic_rnn(fw_cell, bw_cell, embedded, sequence_length=self.lengths, dtype=tf.float32)
-            #lstm output with shape [batch_size, max_length, config.lstm_units * 2]
-            self.bilstm_output_dr = tf.concat([fw_output, bw_output], -1)
-            #self.bilstm_output_dr = tf.nn.dropout(self.bilstm_output, self.dr)
+        if self.config.lstm_units > 0:
+            with tf.name_scope('lstm-layer'):
+                fw_cell = tf.nn.rnn_cell.LSTMCell(self.config.lstm_units)
+                bw_cell = tf.nn.rnn_cell.LSTMCell(self.config.lstm_units)
+                (fw_output, bw_output), _ = tf.nn.bidirectional_dynamic_rnn(fw_cell, bw_cell, embedded, sequence_length=self.lengths, dtype=tf.float32)
+                #lstm output with shape [batch_size, max_length, config.lstm_units * 2]
+                self.bilstm_output_dr = tf.concat([fw_output, bw_output], -1)
+                #self.bilstm_output_dr = tf.nn.dropout(self.bilstm_output, self.dr)
+        else:
+            self.bilstm_output_dr = embedded
+            self.config.lstm_units = int(self.config.embedding_dim / 2)
         
         with tf.name_scope('projection'):
             n_steps = tf.shape(self.bilstm_output_dr)[1]

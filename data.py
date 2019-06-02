@@ -60,14 +60,16 @@ def process_raw(config):
                             #print(orig)
                             #print(unit)
                             continue
-                        '''len_word = len(word)
-                        if len_word == 1:
-                            charactors.append(word)
-                            tags.append('S-{}'.format(pos.upper()))'''
+                        #len_word = len(word)
+                        #if len_word == 1:
+                        #    charactors.append(word)
+                        #    tags.append('S-{}'.format(pos.upper()))
                         for i, c in enumerate(word):
                             charactors.append(c)
                             if i == 0:
                                 tags.append('B-{}'.format(pos.upper()))
+                            #elif i == len_word-1:
+                            #    tags.append('E-{}'.format(pos.upper()))
                             else:
                                 tags.append('I-{}'.format(pos.upper()))
                     if len(charactors) != len(tags):

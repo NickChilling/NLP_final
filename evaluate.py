@@ -68,6 +68,8 @@ def evaluate(config):
         print(model.bilstm_output_dr.eval(feed_dict=feed_dict))
         print('model.logits')
         print(model.logits.eval(feed_dict=feed_dict))'''
+        print('trans_params')
+        print(trans_params)
         #print(np.array(logits[:sequence_lengths[0]]).shape)
         #print(np.array(trans_params).shape)
         querys = []
