@@ -18,7 +18,7 @@ def train(config):
             print(e)
             os.remove(config.train_data_path)
             os.remove(config.dev_data_path)
-            os.remove(config.test_data_path)
+            os.remove(config.test1_data_path)
             exit()
     
     print('Preparing dataset...')
@@ -59,7 +59,7 @@ def train(config):
     step_holder = tf.placeholder(tf.int32, [], name='step_holder')
     global_step_assign = tf.assign(global_step, step_holder)
 
-    saver = tf.train.Saver(max_to_keep=2)
+    saver = tf.train.Saver(max_to_keep=100)
 
     print('Initiate a session')
     with tf.Session() as sess:
@@ -83,6 +83,12 @@ def train(config):
             if yorn != 'y':
                 exit()
         print('Done')
+
+        if not os.path.exists(config.save_path+'dev_loss'):
+            if not  os.path.exists(config.save_path):
+                os.mkdir(config.save_path)
+            tmp = open(config.save_path+'dev_loss', 'w', encoding='utf-8')
+            tmp.close()
 
         print('Start training...')
         best_performance = 1e08
@@ -116,13 +122,14 @@ def train(config):
                     model.dr:1}
                 loss_dev = sess.run(model.loss, feed_dict = feed_dict)
                 print('dev_loss({}):'.format(step), loss_dev)
-                dev_file = open(config.save_path+'dev_loss', 'a')
+                dev_file = open(config.save_path+'dev_loss', 'a', encoding='utf-8')
                 print('dev_loss({}):'.format(step), loss_dev, file=dev_file)
                 dev_file.close()
                 if loss_dev < best_performance-1:
                     best_performance = loss_dev
                     non_increasing_epoch = 0
-                    if i > init_step:
+                    #if i > init_step:
+                    if True:
                         saver.save(sess, config.save_path, global_step=step)
                         print('model has been saved in {}'.format(config.save_path))
                         print('model has been saved in {}'.format(config.save_path))

@@ -47,6 +47,12 @@ def evaluate(config):
         print('Step: {}'.format(global_step.eval()))
         data = sess.run(eva_iter)
         print('Shape of data:', data.shape)
+        print('model.embedding')
+        print(model.embedding.eval())
+        print('model.w')
+        print(model.w.eval())
+        print('model.b')
+        print(model.b.eval())
         l = (data.shape[1] - 1) // 2
         sequences = data[:, :l]
         labels = data[:, l:-1]
@@ -54,6 +60,16 @@ def evaluate(config):
         feed_dict = {model.inputs:sequences,model.lengths: sequence_lengths, model.dr:1}
         # predict = sess.run(model.logits,feed_dict=feed_dict)
         logits,trans_params = sess.run([model.logits, model.trans_params], feed_dict=feed_dict)
+        '''print('trans_params')
+        print(trans_params)
+        print('model.bilstm_output', model.bilstm_output.eval(feed_dict=feed_dict).shape)
+        print(model.bilstm_output.eval(feed_dict=feed_dict))
+        print('bilstm_output_dr', model.bilstm_output_dr.eval(feed_dict=feed_dict).shape)
+        print(model.bilstm_output_dr.eval(feed_dict=feed_dict))
+        print('model.logits')
+        print(model.logits.eval(feed_dict=feed_dict))'''
+        print('trans_params')
+        print(trans_params)
         #print(np.array(logits[:sequence_lengths[0]]).shape)
         #print(np.array(trans_params).shape)
         querys = []
@@ -86,34 +102,50 @@ def evaluate(config):
     for i in range(len(responses)):
         for j in range(len(responses[i])):
             responses[i][j] = id2tag[int(responses[i][j])]
- 
+
+    print(querys[0])
+
     print(responses[0])
     print(querys[1])
     print(responses[1])
     if config.task == 'wordseg':
-        with open('wordseg_test2.txt', 'w',encoding='utf-8') as out_file:
-            for i in range(len(responses)):
-                first = True
-                word = []
-                last_word = []
-                for q, r in zip(querys[i], responses[i]):
-                    if first:
-                        r = 'B'
-                    if r == 'B':
-                        out_file.write(''.join(word))
-                        if not first:
-                            out_file.write(' ')
-                        word = [q]
-                        last_word =[q]
-                    else:
-                        word.append(q)
-                        last_word.append(q)
-                    first = False
-                out_file.write(''.join(last_word))
-                out_file.write('\n')
-        # word_seg_score(config.raw_test1_data_path,'wordseg_test.txt')
+
+        out_file = open('wordseg_test.txt', 'w', encoding='utf-8')
+        for i in range(len(responses)):
+            first = True
+            word = []
+            for q, r in zip(querys[i], responses[i]):
+                if first and (r == 'I' or r == 'E'):
+                    r = 'B'
+                if r == 'B':
+                    out_file.write(''.join(word))
+                    if len(word) > 0:
+                        out_file.write(' ')
+                    word = [q]
+                elif r == 'S':
+                    out_file.write(''.join(word))
+                    if len(word) > 0:
+                        out_file.write(' ')
+                    out_file.write(q)
+                    out_file.write(' ')
+                    word = []
+                else:
+                    word.append(q)
+                first = False
+            out_file.write(''.join(word))
+            out_file.write('\n')
+        print(config.raw_test1_data_path)
+        out_file.close()
+        word_seg_score(config.raw_test1_data_path,'wordseg_test.txt')
+        print('----------------------------------------')
+        print('Start wordseg_evaluate.py...')
+        time.sleep(1)
+        os.system('python wordseg_evaluate.py')
+        time.sleep(3)
+
     elif config.task == 'pos':
-        out_file = open('pos_test.txt', 'w')
+        out_file = open('pos_test.txt', 'w', encoding='utf-8')
+        out_file_ws = open('wordseg_test.txt', 'w', encoding='utf-8')
         for i in range(len(responses)):
             first = True
             correct = True
@@ -130,12 +162,15 @@ def evaluate(config):
                         word.append(q)
                     else:
                         out_file.write(''.join(word) + (('/'+word_start[2:]) if word_start != 'O' else '') + ' ')
+                        out_file_ws.write(''.join(word) + ' ')
                         word = [q]
                         word_start = 'O'
                 elif r[0] == 'B':
                     out_file.write(''.join(word))
-                    if not first:
+                    out_file_ws.write(''.join(word))
+                    if len(word) > 0:
                         out_file.write((('/'+word_start[2:]).lower() if word_start != 'O' else '') + ' ')
+                        out_file_ws.write(' ')
                     word = [q]
                     word_start = r
                 else:
@@ -143,14 +178,24 @@ def evaluate(config):
                     if r[1:] != word_start[1:]:
                         correct = False
                 first = False
+            out_file.write(''.join(word) + (('/'+word_start[2:]).lower() if word_start != 'O' else ''))
             out_file.write('\n')
-            if not correct:
+            out_file_ws.write(''.join(word))
+            out_file_ws.write('\n')
+            if False:
+            #if not correct:
                 print('Wrong sentence:', querys[i])
                 print('    its tag:', responses[i])
         out_file.close()
+        out_file_ws.close()
         print('Start pos_evaluate.py...')
         time.sleep(1)
         os.system('python pos_evaluate.py')
+        time.sleep(3)
+        print('----------------------------------------')
+        print('Start wordseg_evaluate.py...')
+        time.sleep(1)
+        os.system('python wordseg_evaluate.py')
         time.sleep(3)
     else:
         raise Exception('task should be wordseg or pos')
@@ -194,8 +239,7 @@ def word_seg_score(test_path,result_path):
         precision = true_word/total_word
         recall = true_word/predict_word
         f1 = 2*precision*recall/(precision+recall)
-        print('precision',precision)
-        print('recall',recall)
-        print('f1',f1)
-            
-                 
+        print('precision:',precision)
+        print('recall:',recall)
+        print('f1:',f1)
+
