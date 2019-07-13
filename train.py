@@ -125,7 +125,7 @@ def train(config):
                 dev_file = open(config.save_path+'dev_loss', 'a', encoding='utf-8')
                 print('dev_loss({}):'.format(step), loss_dev, file=dev_file)
                 dev_file.close()
-                if loss_dev < best_performance:
+                if loss_dev < best_performance-1:
                     best_performance = loss_dev
                     non_increasing_epoch = 0
                     #if i > init_step:

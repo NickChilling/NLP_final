@@ -103,12 +103,13 @@ def evaluate(config):
         for j in range(len(responses[i])):
             responses[i][j] = id2tag[int(responses[i][j])]
 
-    
     print(querys[0])
+
     print(responses[0])
     print(querys[1])
     print(responses[1])
     if config.task == 'wordseg':
+
         out_file = open('wordseg_test.txt', 'w', encoding='utf-8')
         for i in range(len(responses)):
             first = True
@@ -141,6 +142,7 @@ def evaluate(config):
         time.sleep(1)
         os.system('python wordseg_evaluate.py')
         time.sleep(3)
+
     elif config.task == 'pos':
         out_file = open('pos_test.txt', 'w', encoding='utf-8')
         out_file_ws = open('wordseg_test.txt', 'w', encoding='utf-8')
@@ -240,3 +242,4 @@ def word_seg_score(test_path,result_path):
         print('precision:',precision)
         print('recall:',recall)
         print('f1:',f1)
+
