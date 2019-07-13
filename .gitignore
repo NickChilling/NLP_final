@@ -3,9 +3,18 @@ __pycache__*
 tensorboard*
 venv*
 
+*test.txt
 *.bak
+*.swp
 *.pyc
+<<<<<<< HEAD
+.vscode/settings.json
+.vscode/launch.json
+.idea/
+final_work_space.code-workspace
+=======
 *.pkl
 *.ckpt
 checkpoint*
 events.out.tfevents.*
+>>>>>>> c1a01f652eb13fa95138ac23824439c23f6e018f
